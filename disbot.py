@@ -33,10 +33,10 @@ async def on_member_update(before, after):
 	tasks = []
 
 	#tasks.append(client.send_message(channel, bot_prelude + "Wait what ?"))
-	if before.status != discord.Status.offline and after.status == discord.Status.offline:
-		print(after.nick, "went offline from server", after.server)
-		if after.server == channels["comput"][0]:
-			tasks.append(client.send_message(channels["comput"][1], bot_prelude + "Au revoir " + after.nick + " !"))
+	#if before.status != discord.Status.offline and after.status == discord.Status.offline:
+		#print(after.nick, "went offline from server", after.server)
+		#if after.server == channels["comput"][0]:
+			#tasks.append(client.send_message(channels["comput"][1], bot_prelude + "Au revoir " + after.nick + " !"))
 
 	for t in tasks:
 		await t
