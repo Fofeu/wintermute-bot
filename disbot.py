@@ -20,7 +20,7 @@ async def on_ready():
 	print("is online as", client.user.name)
 	for s in client.servers:
 		if s.name == channels["comput"][0]:
-			s.me.game = discord.Game(name="Manipulating humanity")
+			#s.me.game = discord.Game(name="Manipulating humanity")
 			for c in s.channels:
 				if c.name == channels["comput"][1]:
 					print("found #botchannel")
