@@ -59,8 +59,8 @@ async def on_message(mess):
 		elif for_me(mess, "roll"):
 			text = match(mess, "roll")[0]
 			roll = dice_parser.parse(text)
-			if type(roll) is int:
-				tasks.append(client.send_message(mess.channel, bot_prelude + mess.author.mention + " Result is " + str(roll)))
+			if roll is not None:
+				tasks.append(client.send_message(mess.channel, bot_prelude + mess.author.mention + " " + str(roll) + " = " + str(int(roll))))
 			else:
 				tasks.append(client.send_message(mess.channel, bot_prelude + mess.author.mention + "Could not parse: " + text))
 
