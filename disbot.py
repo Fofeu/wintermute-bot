@@ -3,6 +3,7 @@ from conn import key
 from utils import *
 import logging
 from botgram import BotGram
+from parseresult import *
 
 channels = {"comput" : ("Comput Yourself", "botchannel")}
 
