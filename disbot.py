@@ -37,7 +37,6 @@ async def on_ready():
 
 @client.event
 async def on_member_update(before, after):
-	global channel
 	tasks = []
 
 	for t in tasks:
