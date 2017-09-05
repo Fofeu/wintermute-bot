@@ -54,7 +54,7 @@ async def on_message(mess):
 	logging.info("content: " + str(mess.content))
 
 	if mess.channel.permissions_for(mess.channel.server.me).send_messages:
-		resp = bot_parser.parse_mess(mess)
+		resp = bot_parser.parse(mess)
 		if resp is not None:
 			tasks.append(client.send_message(mess.channel, bot_prelude + mess.author.mention + ' ' + str(resp)))
 

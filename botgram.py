@@ -46,11 +46,9 @@ class BotGram(object):
 	def p_start(self, p):
 		'''start : MENTION rollcmd
 		         | MENTION cdlamerdecmd'''
-		print(self.mess.channel.server.me.mention)
-		print(p[1])
 		if self.mess.channel.server.me.mention != p[1]:
 			raise WronglyAddressedMessage()
-		self.val = p[2]
+		p[0] = p[2]
 
 	def p_cdlamerdecmd(self, p):
 		'cdlamerdecmd : CDLAMERDE'
@@ -134,21 +132,16 @@ class BotGram(object):
 		self.val = None
 		self._discord = discord
 
-	def parse(self, s):
+	def parse(self, mess):
 		try:
-			self.parser.parse(s, lexer=self.lexer)
-			return self.val
+			self.mess = mess
+			a = self.parser.parse(mess.content, lexer=self.lexer)
+			return a
 		except ValueError as e:
 			#return TextAnswer(e[0])
-			print('c')
 			pass
 		except WronglyAddressedMessage:
-			print('d')
 			pass
-
-	def parse_mess(self, mess):
-		self.mess = mess
-		return self.parse(mess.content)
 
 if __name__ == "__main__":
 	d = BotGram(None)
