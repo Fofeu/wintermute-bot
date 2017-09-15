@@ -47,7 +47,7 @@ class ThrowResult:
 	def __repr__(self):
 		if self._results is None:
 			self.define()
-		if self._detail:
+		if self._detail != False:
 			return '(' + '+'.join(map(str, self._results)) + ')'
 		else:
 			return self._results
