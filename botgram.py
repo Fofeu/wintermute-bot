@@ -3,6 +3,7 @@ import ply.yacc as yacc
 from exprresult import *
 from parseresult import *
 from parseexceptions import *
+from mkmutils import *
 
 class BotGram(object):
 	tokens = (
@@ -13,6 +14,7 @@ class BotGram(object):
 		'DECA',
 		'HEXA',
 		'DICED',
+		'MTG',
 		'ADD',
 		'SUB',
 		'MUL',
@@ -26,6 +28,7 @@ class BotGram(object):
 	t_ROLL = r'roll'
 	t_DETAIL = r'detail'
 	t_DICED = r'd'
+	t_MTG = r'mtg'
 	t_ADD = r'\+'
 	t_SUB = r'-'
 	t_MUL = r'\*'
@@ -51,7 +54,8 @@ class BotGram(object):
 
 	def p_start(self, p):
 		'''start : MENTION rollcmd
-		         | MENTION cdlamerdecmd'''
+		         | MENTION cdlamerdecmd
+		         | MENTION mtgcmd'''
 		if self.mess and self.mess.channel.server.me.mention != p[1]:
 			raise WronglyAddressedMessage()
 		p[0] = p[2]
@@ -59,6 +63,13 @@ class BotGram(object):
 	def p_cdlamerdecmd(self, p):
 		'cdlamerdecmd : CDLAMERDE'
 		p[0] = TextAnswer("Oui, maîîître !")
+
+	def p_mtgcmd(self, p):
+		'''mtgcmd : MTG'''
+		p[0] = TextAnswer("MTG commands are not implemented yet")
+
+	def p_mkmprices(self, p):
+		'mkmprices : '
 
 	def p_rollcmd_simple(self, p):
 		'rollcmd : ROLL rollexpr'
