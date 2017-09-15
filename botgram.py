@@ -10,7 +10,8 @@ class BotGram(object):
 		'CDLAMERDE',
 		'ROLL',
 		'DETAIL',
-		'NUMBER',
+		'DECA',
+		'HEXA',
 		'DICED',
 		'ADD',
 		'SUB',
@@ -24,7 +25,7 @@ class BotGram(object):
 	t_CDLAMERDE = r'cdlamerde!'
 	t_ROLL = r'roll'
 	t_DETAIL = r'detail'
-	t_DICED = r'[dD]'
+	t_DICED = r'd'
 	t_ADD = r'\+'
 	t_SUB = r'-'
 	t_MUL = r'\*'
@@ -33,20 +34,25 @@ class BotGram(object):
 	t_RPAR = r'\)'
 	t_ignore = r' '
 
-	def t_NUMBER(self, t):
-		r'\d+'
+	def t_DECA(self, t):
+		r'[1-9][0-9]*'
 		t.value = int(t.value)
 		return t
 
+	def t_HEXA(self, t):
+		r'0x[0-9A-F]+'
+		t.value = int(t.value, 16)
+		return t
+
 	def t_error(self, t):
-		raise ValueError('Unable to tokenize string:\n' + t.value + '\n')
+		raise LexerError(t)
 
 	start = 'start'
-	
+
 	def p_start(self, p):
 		'''start : MENTION rollcmd
 		         | MENTION cdlamerdecmd'''
-		if self.mess.channel.server.me.mention != p[1]:
+		if self.mess and self.mess.channel.server.me.mention != p[1]:
 			raise WronglyAddressedMessage()
 		p[0] = p[2]
 
@@ -114,36 +120,48 @@ class BotGram(object):
 		'throwexpr : uambexpr'
 		p[0] = p[1]
 
-	def p_uambexpr_num(self, p):
-		'uambexpr : NUMBER'
+	def p_uambexpr_deca(self, p):
+		'uambexpr : DECA'
+		p[0] = ConstResult(p[1])
+
+	def p_uambexpr_hexa(self, p):
+		'uambexpr : HEXA'
 		p[0] = ConstResult(p[1])
 
 	def p_uambexpr_par(self, p):
 		'uambexpr : LPAR rollexpr RPAR'
 		p[0] = p[2]
 
-		
+
 	def p_error(self, p):
-		raise ValueError('Unable to parse string: ' + p.value)
+		raise ParserError(p)
+
+	mess = None
+	val = None
 
 	def __init__(self, discord):
 		self.lexer = lex.lex(module=self)
-		self.parser = yacc.yacc(module=self)
-		self.val = None
+		self.parser = yacc.yacc(module=self, write_tables=False)
 		self._discord = discord
+
+	def parse_text(self, s):
+		return self.parser.parse(s, lexer=self.lexer)
 
 	def parse(self, mess):
 		try:
 			self.mess = mess
 			a = self.parser.parse(mess.content, lexer=self.lexer)
 			return a
-		except ValueError as e:
-			#return TextAnswer(e[0])
+		except LexerError as e:
+			print(e)
+			pass
+		except ParserError as e:
+			print(e)
 			pass
 		except WronglyAddressedMessage:
 			pass
 
 if __name__ == "__main__":
 	d = BotGram(None)
-	r = d.parse(input())
-	print(str(r), '=', int(r))
+	r = d.parse_text("<@!132> " + input("Input: "))
+	print(str(r))
