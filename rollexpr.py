@@ -2,12 +2,14 @@ from numpy.random import randint
 from numpy import sum
 from operator import add, sub, neg, mul, floordiv
 from itertools import repeat
+import traceback
 
 class RollResult:
 	def __init__(self, roll, detail):
 		self._roll = roll
 		self._detail = detail
-		self._roll.detail()
+		if detail:
+			self._roll.detail()
 
 	def __repr__(self):
 		if self._detail:
@@ -29,20 +31,26 @@ class ConstResult:
 		return int(self._value)
 
 class ThrowResult:
+	_results = None
+
 	def __init__(self, number, sides):
 		self._number = number
 		self._sides = sides
-		self._results = None
 		self._detail = False
 
 	def detail(self):
 		self._detail = True
+		self._sides.detail()
+		self._number.detail()
 
 	def define(self):
 		if self._detail:
 			self._results = randint(1, int(self._sides)+1, int(self._number))
 		else:
-			self._results = sum(map(lambda x: randint(1, int(self._sides)+1, 1), repeat(None, int(self._number))))
+			self._results = 0
+			sides = int(self._sides)+1
+			number = int(self._number)
+			self._results = int(sum(randint(1, sides, number)))
 
 	def __repr__(self):
 		if self._results is None:
@@ -50,7 +58,7 @@ class ThrowResult:
 		if self._detail != False:
 			return '(' + '+'.join(map(str, self._results)) + ')'
 		else:
-			return self._results
+			return str(self._results)
 
 	def __int__(self):
 		if self._results is None:

@@ -1,26 +1,40 @@
 import ply.lex as lex
 import ply.yacc as yacc
-from exprresult import *
+from rollexpr import *
 from parseresult import *
 from parseexceptions import *
 from mkmutils import *
 
 class BotGram(object):
+
+	reserved_words = {
+		'cdlamerde': 'CDLAMERDE',
+		'roll': 'ROLL',
+		'detail': 'DETAIL',
+		'mtg': 'mtg',
+		'mkm': 'MKM'
+	}
+
 	tokens = (
 		'MENTION',
+		
 		'CDLAMERDE',
+		
 		'ROLL',
 		'DETAIL',
 		'DECA',
 		'HEXA',
 		'DICED',
-		'MTG',
 		'ADD',
 		'SUB',
 		'MUL',
 		'DIV',
 		'LPAR',
-		'RPAR'
+		'RPAR',
+		
+		'MTG',
+		'MKM',
+		'QUOTE'
 	)
 
 	t_MENTION = r'<@[!0-9]*>'
@@ -28,13 +42,15 @@ class BotGram(object):
 	t_ROLL = r'roll'
 	t_DETAIL = r'detail'
 	t_DICED = r'd'
-	t_MTG = r'mtg'
 	t_ADD = r'\+'
 	t_SUB = r'-'
 	t_MUL = r'\*'
 	t_DIV = r'/'
 	t_LPAR = r'\('
 	t_RPAR = r'\)'
+	t_MTG = r'mtg'
+	t_MKM = r'mkm'
+	t_QUOTE = '"[a-zA-Z][ a-zA-Z\']*"'
 	t_ignore = r' '
 
 	def t_DECA(self, t):
@@ -65,11 +81,12 @@ class BotGram(object):
 		p[0] = TextAnswer("Oui, maîîître !")
 
 	def p_mtgcmd(self, p):
-		'''mtgcmd : MTG'''
+		'''mtgcmd : MTG mkmprices'''
 		p[0] = TextAnswer("MTG commands are not implemented yet")
 
 	def p_mkmprices(self, p):
-		'mkmprices : '
+		'mkmprices : MKM QUOTE'
+		p[0] = TextAnswer("Performing search on " + p[2][1:-1])
 
 	def p_rollcmd_simple(self, p):
 		'rollcmd : ROLL rollexpr'
