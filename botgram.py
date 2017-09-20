@@ -81,7 +81,7 @@ class BotGram(object):
 		p[0] = TextAnswer("Oui, maîîître !")
 
 	def p_mtgcmd(self, p):
-		'''mtgcmd : MTG mkmprices'''
+		'''mtgcmd : MTG'''
 		p[0] = TextAnswer("MTG commands are not implemented yet")
 
 	def p_mkmprices(self, p):
