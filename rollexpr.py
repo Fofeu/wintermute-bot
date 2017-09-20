@@ -1,7 +1,5 @@
 from numpy.random import randint
-from numpy import sum
 from operator import add, sub, neg, mul, floordiv
-from itertools import repeat
 import traceback
 
 class RollResult:
@@ -30,6 +28,16 @@ class ConstResult:
 	def __int__(self):
 		return int(self._value)
 
+def it(x, step):
+	state = x
+	while state > 0:
+		if state > step:
+			state -= step
+			step
+		else:
+			yield state
+			state = 0
+
 class ThrowResult:
 	_results = None
 
@@ -44,13 +52,16 @@ class ThrowResult:
 		self._number.detail()
 
 	def define(self):
-		if self._detail:
-			self._results = randint(1, int(self._sides)+1, int(self._number))
+		sides = int(self._sides)+1
+		number = int(self._number)
+		if self._detail and int(self._sides) < 100:
+			self._results = randint(1, sides, number)
 		else:
 			self._results = 0
-			sides = int(self._sides)+1
-			number = int(self._number)
-			self._results = int(sum(randint(1, sides, number)))
+			#self._results = sum(
+					#map(lambda x: sum(randint(1, sides, x)),
+						#it(number)))
+			self._results = int(sum(map(lambda x: sum(randint(1, sides, x)), it(number, min(number, 100000)))))
 
 	def __repr__(self):
 		if self._results is None:
@@ -63,10 +74,10 @@ class ThrowResult:
 	def __int__(self):
 		if self._results is None:
 			self.define()
-		if self._detail:
+		if self._detail and int(self._sides) < 100:
 			return int(sum(self._results))
 		else:
-			return self._results
+			return int(self._results)
 
 class BinOpResult:
 	def __init__(self, op, l, r):
