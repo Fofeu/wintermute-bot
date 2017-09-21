@@ -33,7 +33,7 @@ def it(x, step):
 	while state > 0:
 		if state > step:
 			state -= step
-			step
+			yield step
 		else:
 			yield state
 			state = 0
@@ -61,7 +61,7 @@ class ThrowResult:
 			#self._results = sum(
 					#map(lambda x: sum(randint(1, sides, x)),
 						#it(number)))
-			self._results = int(sum(map(lambda x: sum(randint(1, sides, x)), it(number, min(number, 100000)))))
+			self._results = int(sum(map(lambda x: sum(randint(1, sides, x)), it(number, min(number, 10000000)))))
 
 	def __repr__(self):
 		if self._results is None:
