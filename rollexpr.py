@@ -10,7 +10,11 @@ class RollResult:
 		if detail:
 			self._roll.detail()
 
+	def define(self):
+		self._roll.define()
+
 	def __repr__(self):
+		self.define()
 		if self._detail:
 			return str(self._roll) + ' = ' + str(int(self._roll))
 		else:
@@ -21,6 +25,9 @@ class ConstResult:
 		self._value = value
 
 	def detail(self):
+		pass
+
+	def define(self):
 		pass
 
 	def __repr__(self):
@@ -43,6 +50,8 @@ class ThrowResult:
 		self._number.detail()
 
 	def define(self):
+		self._number.define()
+		self._sides.define()
 		sides = int(self._sides)+1
 		number = int(self._number)
 		if self._detail and int(self._sides) < 100:
@@ -55,16 +64,13 @@ class ThrowResult:
 			self._results = int(sum(map(lambda x: sum(randint(1, sides, x)), unbignum(number, min(number, 10000000)))))
 
 	def __repr__(self):
-		if self._results is None:
-			self.define()
 		if self._detail != False:
 			return '(' + '+'.join(map(str, self._results)) + ')'
 		else:
 			return str(self._results)
 
 	def __int__(self):
-		if self._results is None:
-			self.define()
+
 		if self._detail and int(self._sides) < 100:
 			return int(sum(self._results))
 		else:
@@ -79,6 +85,10 @@ class BinOpResult:
 	def detail(self):
 		self._l.detail()
 		self._r.detail()
+
+	def define(self):
+		self._l.define()
+		self._r.define()
 
 	def _opstr(self):
 		if self._op is add:
@@ -103,6 +113,9 @@ class UnOpResult:
 
 	def detail(self):
 		self._v.detail()
+
+	def define(self):
+		self._v.define()
 
 	def _opstr(self):
 		if self._op is neg:

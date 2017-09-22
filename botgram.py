@@ -24,6 +24,8 @@ class BotGram(object):
 		'DETAIL',
 		'DECA',
 		'HEXA',
+		'OCTA',
+		'BINA',
 		'DICED',
 		'ADD',
 		'SUB',
@@ -61,6 +63,16 @@ class BotGram(object):
 	def t_HEXA(self, t):
 		r'0x[0-9A-F]+'
 		t.value = int(t.value, 16)
+		return t
+
+	def t_OCTA(self, t):
+		r'0o[0-7]+'
+		t.value = int(t.value, 8)
+		return t
+
+	def t_BINA(self, t):
+		r'0b[01]+'
+		t.value = int(t.value, 2)
 		return t
 
 	def t_error(self, t):
@@ -154,6 +166,14 @@ class BotGram(object):
 
 	def p_uambexpr_hexa(self, p):
 		'uambexpr : HEXA'
+		p[0] = ConstResult(p[1])
+
+	def p_uambexpr_octa(self, p):
+		'uambexpr : OCTA'
+		p[0] = ConstResult(p[1])
+
+	def p_uambexpr_bina(self, p):
+		'uambexpr : BINA'
 		p[0] = ConstResult(p[1])
 
 	def p_uambexpr_par(self, p):
