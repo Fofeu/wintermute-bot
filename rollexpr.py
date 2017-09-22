@@ -1,6 +1,7 @@
 from numpy.random import randint
 from operator import add, sub, neg, mul, floordiv
 import traceback
+from utils import unbignum
 
 class RollResult:
 	def __init__(self, roll, detail):
@@ -28,16 +29,6 @@ class ConstResult:
 	def __int__(self):
 		return int(self._value)
 
-def it(x, step):
-	state = x
-	while state > 0:
-		if state > step:
-			state -= step
-			yield step
-		else:
-			yield state
-			state = 0
-
 class ThrowResult:
 	_results = None
 
@@ -61,7 +52,7 @@ class ThrowResult:
 			#self._results = sum(
 					#map(lambda x: sum(randint(1, sides, x)),
 						#it(number)))
-			self._results = int(sum(map(lambda x: sum(randint(1, sides, x)), it(number, min(number, 10000000)))))
+			self._results = int(sum(map(lambda x: sum(randint(1, sides, x)), unbignum(number, min(number, 10000000)))))
 
 	def __repr__(self):
 		if self._results is None:
