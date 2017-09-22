@@ -8,8 +8,8 @@ from concurrent.futures import TimeoutError
 from pebble import ProcessPool
 
 if __name__ =='__main__':
-	channels = {"comput" : ("Comput Yourself", "botchannel")}
 
+	channels = {"comput" : ("Comput Yourself", "botchannel")}
 	bot_prelude = '[bot] '
 	timeoutt = 10
 
