@@ -96,10 +96,6 @@ class BotGram(object):
 		'''mtgcmd : MTG'''
 		p[0] = TextAnswer("MTG commands are not implemented yet")
 
-	def p_mkmprices(self, p):
-		'mkmprices : MKM QUOTE'
-		p[0] = TextAnswer("Performing search on " + p[2][1:-1])
-
 	def p_rollcmd_simple(self, p):
 		'rollcmd : ROLL rollexpr'
 		p[0] = RollResult(p[2], False)
