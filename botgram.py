@@ -34,9 +34,7 @@ class BotGram(object):
 		'LPAR',
 		'RPAR',
 		
-		'MTG',
-		'MKM',
-		'QUOTE'
+		'MTG'
 	)
 
 	t_MENTION = r'<@[!0-9]*>'
@@ -51,8 +49,6 @@ class BotGram(object):
 	t_LPAR = r'\('
 	t_RPAR = r'\)'
 	t_MTG = r'mtg'
-	t_MKM = r'mkm'
-	t_QUOTE = '"[a-zA-Z][ a-zA-Z\']*"'
 	t_ignore = r' '
 
 	def t_DECA(self, t):
