@@ -1,4 +1,3 @@
-import mkmenv
 from mkmsdk.mkm import mkm
 
 MTG_ID = 1

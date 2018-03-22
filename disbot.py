@@ -1,5 +1,5 @@
 import discord
-from conn import key
+from secrets import key
 from utils import *
 import logging
 from botgram import BotGram
