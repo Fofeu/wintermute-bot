@@ -1,4 +1,5 @@
 #!/bin/bash
 
-screen -S disbot python disbot.py
+cd src
+screen -S disbot python main.py
 
