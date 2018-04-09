@@ -183,10 +183,9 @@ class BotGram(object):
 	mess = None
 	val = None
 
-	def __init__(self, discord):
+	def __init__(self):
 		self.lexer = lex.lex(module=self)
 		self.parser = yacc.yacc(module=self, write_tables=False)
-		self._discord = discord
 
 	def parse_text(self, s):
 		return self.parser.parse(s, lexer=self.lexer)
@@ -203,6 +202,6 @@ class BotGram(object):
 			pass
 
 if __name__ == "__main__":
-	d = BotGram(None)
+	d = BotGram()
 	r = d.parse_text("<@!132> " + input("Input: "))
 	print(str(r))

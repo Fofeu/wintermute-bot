@@ -32,7 +32,7 @@ class Wintermute(discord.Client):
 		else:
 			self.__loop = asyncio.get_event_loop()
 
-		self.__parser = BotGram(self)
+		self.__parser = BotGram()
 		self.__pool = ProcessPool(max_workers=multiprocessing)
 
 	def launch(self, key):
