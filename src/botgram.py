@@ -196,10 +196,7 @@ class BotGram(object):
 			self.mess = mess
 			a = self.parser.parse(mess.content, lexer=self.lexer)
 			return a
-		except LexerError as e:
-			print(e)
-			pass
-		except ParserError as e:
+		except (LexerError,ParserError) as e:
 			print(e)
 			pass
 		except WronglyAddressedMessage:
