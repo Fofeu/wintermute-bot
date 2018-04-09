@@ -7,6 +7,3 @@ def unbignum(x, step):
 		else:
 			yield state
 			state = 0
-
-def composemess(x):
-	return (x[0], x[1] + str(x[2]))
