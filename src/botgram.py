@@ -84,25 +84,24 @@ class BotGram(object):
 		'''start : MENTION rollcmd
 		         | MENTION cdlamerdecmd
 		         | MENTION mtgcmd'''
-		if self.mess and self.mess.channel.server.me.mention != p[1]:
-			raise WronglyAddressedMessage()
-		p[0] = p[2]
+		p[0] = TextAnswer(p[1], p[2])
 
 	def p_cdlamerdecmd(self, p):
 		'cdlamerdecmd : CDLAMERDE'
-		p[0] = TextAnswer("Oui, maîîître !")
+		p[0] = "Oui, maîîître !"
 
 	def p_mtgcmd(self, p):
 		'''mtgcmd : MTG'''
-		p[0] = TextAnswer("MTG commands are not implemented yet")
+		p[0] = "MTG commands are not implemented yet"
 
-	def p_rollcmd_simple(self, p):
-		'rollcmd : ROLL rollexpr'
-		p[0] = RollResult(p[2], False)
+	def p_rollcmd(self, p):
+		'rollcmd : ROLL opt_detail rollexpr'
+		p[0] = RollResult(p[3], p[2])
 
-	def p_rollcmd_detail(self, p):
-		'rollcmd : ROLL DETAIL rollexpr'
-		p[0] = RollResult(p[3], True)
+	def p_opt_detail_detail(self, p):
+		'''opt_detail : DETAIL
+		              |'''
+		p[0] = len(p) > 1
 
 	def p_rollexpr_init(self, p):
 		'rollexpr : subexpr'
@@ -180,9 +179,6 @@ class BotGram(object):
 	def p_error(self, p):
 		raise ParserError(p)
 
-	mess = None
-	val = None
-
 	def __init__(self):
 		self.lexer = lex.lex(module=self)
 		self.parser = yacc.yacc(module=self, write_tables=False)
@@ -192,14 +188,19 @@ class BotGram(object):
 
 	def parse(self, mess):
 		try:
-			self.mess = mess
-			a = self.parser.parse(mess.content, lexer=self.lexer)
-			return a
+			parsed = self.parser.parse(mess.content, lexer=self.lexer)
+			self.check(parsed, mess)
+			return parsed
 		except (LexerError,ParserError) as e:
 			print(e)
 			pass
 		except WronglyAddressedMessage:
 			pass
+
+	def check(self, parsed, mess):
+		# Checks that the message is actually for us
+		if parsed._mention != mess.channel.server.me.mention:
+			raise WronglyAddressedMessage
 
 if __name__ == "__main__":
 	d = BotGram()
