@@ -11,15 +11,16 @@ class BotGram(object):
 		'cdlamerde': 'CDLAMERDE',
 		'roll': 'ROLL',
 		'detail': 'DETAIL',
-		'mtg': 'mtg',
-		'mkm': 'MKM'
+		'd': 'DICED',
+		'D': 'DICED',
+		'mtg': 'MTG'
 	}
 
 	tokens = (
 		'MENTION',
-		
+
 		'CDLAMERDE',
-		
+
 		'ROLL',
 		'DETAIL',
 		'DECA',
@@ -33,22 +34,17 @@ class BotGram(object):
 		'DIV',
 		'LPAR',
 		'RPAR',
-		
+
 		'MTG'
 	)
 
 	t_MENTION = r'<@[!0-9]*>'
-	t_CDLAMERDE = r'cdlamerde!'
-	t_ROLL = r'roll'
-	t_DETAIL = r'detail'
-	t_DICED = r'd'
 	t_ADD = r'\+'
 	t_SUB = r'-'
 	t_MUL = r'\*'
 	t_DIV = r'/'
 	t_LPAR = r'\('
 	t_RPAR = r'\)'
-	t_MTG = r'mtg'
 	t_ignore = r' '
 
 	def t_DECA(self, t):
@@ -70,6 +66,14 @@ class BotGram(object):
 		r'0b[01]+'
 		t.value = int(t.value, 2)
 		return t
+
+	def t_ID(self, t):
+		r'[a-zA-Z]+'
+		if t.value in self.reserved_words:
+			t.type = self.reserved_words[t.value]
+			return t
+		else:
+			raise LexerError(t)
 
 	def t_error(self, t):
 		raise LexerError(t)
