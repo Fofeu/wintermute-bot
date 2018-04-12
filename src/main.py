@@ -8,7 +8,8 @@ if __name__ =='__main__':
 	client = Wintermute(
 		channels = channels,
 		bot_prelude = '[bot] ',
-		timeout = 30
+		timeout = 30,
+		multiprocessing = 4
 	)
 
 	client.launch(key)

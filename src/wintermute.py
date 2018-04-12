@@ -35,6 +35,14 @@ class Wintermute(discord.Client):
 		self.__parser = BotGram()
 		self.__pool = ProcessPool(max_workers=multiprocessing)
 
+	def __del__(self):
+		self.__pool.close()
+		self.__pool.join()
+		if self.__loop.is_running():
+			self.__loop.stop()
+		self.__loop.run_until_complete(self.__loop.shutdown_asyncgens())
+		self.__loop.close()
+
 	def launch(self, key):
 		try:
 			self.__loop.run_until_complete(self.start(key))
@@ -69,11 +77,16 @@ class Wintermute(discord.Client):
 			and mess.channel.name == self.__channels[mess.server.name]):
 			resp = self.__parser.parse(mess)
 			if resp is not None:
-				task = self.__pool.schedule(str, args=(resp,), timeout=self.__timeout)
-				asyncio.ensure_future(self.collect_response(mess.channel, mess.author.mention, task), loop=self.__loop)
+				task = self.__pool.schedule(
+					str,
+					args=(resp,),
+					timeout=self.__timeout)
+				asyncio.ensure_future(self.collect_response(mess.channel, mess.author.mention, task))
 
 	async def collect_response(self, channel, mention, task):
 		try:
+			while not task.done():
+				await asyncio.sleep(0.1)
 			result = task.result()
 			await self.send_message(channel,
 				self.__bot_prelude + mention + ' ' + result)
@@ -85,3 +98,4 @@ class Wintermute(discord.Client):
 			if e.response.status == 400:
 				await self.send_message(channel,
 				self.__bot_prelude + mention + ' Error: Request reply was probably too long')
+
