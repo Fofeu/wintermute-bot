@@ -5,5 +5,5 @@ class TextAnswer:
 		self._text = text
 		self._mention = mention
 
-	def __repr__(self):
+	def __str__(self):
 		return str(self._text)

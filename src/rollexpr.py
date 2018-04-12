@@ -13,7 +13,7 @@ class RollResult:
 	def define(self):
 		self._roll.define()
 
-	def __repr__(self):
+	def __str__(self):
 		self.define()
 		if self._detail:
 			return str(self._roll) + ' = ' + str(int(self._roll))
@@ -30,7 +30,7 @@ class ConstResult:
 	def define(self):
 		pass
 
-	def __repr__(self):
+	def __str__(self):
 		return str(self._value)
 
 	def __int__(self):
@@ -63,7 +63,7 @@ class ThrowResult:
 						#it(number)))
 			self._results = int(sum(map(lambda x: sum(randint(1, sides, x)), unbignum(number, min(number, 10000000)))))
 
-	def __repr__(self):
+	def __str__(self):
 		if self._detail != False:
 			return '(' + '+'.join(map(str, self._results)) + ')'
 		else:
@@ -100,7 +100,7 @@ class BinOpResult:
 		elif self._op is floordiv:
 			return '/'
 
-	def __repr__(self):
+	def __str__(self):
 		return '(' + str(self._l) + ')' + self._opstr() + '(' + str(self._r) + ')'
 
 	def __int__(self):
@@ -121,7 +121,7 @@ class UnOpResult:
 		if self._op is neg:
 			return '-'
 
-	def __repr__(self):
+	def __str__(self):
 		return self._opstr() + '(' + str(self._v) + ')'
 
 	def __int__(self):
