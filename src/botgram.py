@@ -48,6 +48,13 @@ class BotGram(object):
 		'HELP'
 	)
 
+	precedence = (
+		('left', 'DICED'),
+		('left', 'ADD', 'SUB'),
+		('left', 'MUL', 'DIV'),
+		('right', 'NEG')
+	)
+
 	t_MENTION = r'<@[!0-9]*>'
 	t_ADD = r'\+'
 	t_SUB = r'-'
@@ -110,13 +117,21 @@ class BotGram(object):
 
 	def p_storecmd(self, p):
 		'storecmd : STORE string'
-		p[0] = "Store commands are not implemented yet. However, I would have stored " + p[3]
+		p[0] = "Store commands are not implemented yet."
 
 	def p_helpcmd(self, p):
-		'helpcmd : HELP string'
+		'helpcmd : HELP opt_string'
 		p[0] = self.help_text(p[2])
 
 	# Strings
+
+	def p_opt_string(self, p):
+		'''opt_string : string
+		              |'''
+		if len(p) > 1:
+			p[0] = p[1]
+		else:
+			p[0] = None
 
 	def p_string_short(self, p):
 		'string : ID'
@@ -137,78 +152,49 @@ class BotGram(object):
 		              |'''
 		p[0] = len(p) > 1
 
-	def p_rollexpr_init(self, p):
-		'rollexpr : subexpr'
-		p[0] = p[1]
-
-	def p_subexpr_rec(self, p):
-		'subexpr : subexpr SUB addexpr'
+	def p_rollexpr_sub(self, p):
+		'rollexpr : rollexpr SUB rollexpr'
 		p[0] = BinOpResult(sub, p[1], p[3])
 
-	def p_subexpr_empty(self, p):
-		'subexpr : addexpr'
-		p[0] = p[1]
-
-	def p_addexpr_rec(self, p):
-		'addexpr : addexpr ADD divexpr'
+	def p_rollexpr_add(self, p):
+		'rollexpr : rollexpr ADD rollexpr'
 		p[0] = BinOpResult(add, p[1], p[3])
 
-	def p_addexpr_empty(self, p):
-		'addexpr : divexpr'
-		p[0] = p[1]
-
-	def p_divexpr_rec(self, p):
-		'divexpr : divexpr DIV mulexpr'
+	def p_rollexpr_div(self, p):
+		'rollexpr : rollexpr DIV rollexpr'
 		p[0] = BinOpResult(floordiv, p[1], p[3])
 
-	def p_divexpr_empty(self, p):
-		'divexpr : mulexpr'
-		p[0] = p[1]
-
-	def p_mulexpr_rec(self, p):
-		'mulexpr : mulexpr MUL usubexpr'
+	def p_rollexpr_mul(self, p):
+		'rollexpr : rollexpr MUL rollexpr'
 		p[0] = BinOpResult(mul, p[1], p[3])
 
-	def p_mulexpr_empty(self, p):
-		'mulexpr : usubexpr'
-		p[0] = p[1]
-
-	def p_usubexpr_neg(self, p):
-		'usubexpr : SUB uambexpr'
+	def p_rollexpr_neg(self, p):
+		'rollexpr : SUB rollexpr %prec NEG'
 		p[0] = UnOpResult(neg, p[2])
 
-	def p_usubexpr_empty(self, p):
-		'usubexpr : throwexpr'
-		p[0] = p[1]
-
-	def p_throwexpr_throw(self, p):
-		'throwexpr : uambexpr DICED uambexpr'
+	def p_rollexpr_throw(self, p):
+		'rollexpr : rollexpr DICED rollexpr'
 		p[0] = ThrowResult(p[1], p[3])
 
-	def p_throwexpr_empty(self, p):
-		'throwexpr : uambexpr'
-		p[0] = p[1]
-
-	def p_uambexpr_deca(self, p):
-		'uambexpr : DECA'
+	def p_rollexpr_deca(self, p):
+		'rollexpr : DECA'
 		p[0] = ConstResult(p[1])
 
-	def p_uambexpr_hexa(self, p):
-		'uambexpr : HEXA'
+	def p_rollexpr_hexa(self, p):
+		'rollexpr : HEXA'
 		p[0] = ConstResult(p[1])
 
-	def p_uambexpr_octa(self, p):
-		'uambexpr : OCTA'
+	def p_rollexpr_octa(self, p):
+		'rollexpr : OCTA'
 		p[0] = ConstResult(p[1])
 
-	def p_uambexpr_bina(self, p):
-		'uambexpr : BINA'
+	def p_rollexpr_bina(self, p):
+		'rollexpr : BINA'
 		p[0] = ConstResult(p[1])
 
-	def p_uambexpr_par(self, p):
-		'uambexpr : LPAR rollexpr RPAR'
+	def p_rollexpr_par(self, p):
+		'rollexpr : LPAR rollexpr RPAR'
 		p[0] = p[2]
-
 
 	def p_error(self, p):
 		raise ParserError(p)
@@ -233,10 +219,11 @@ class BotGram(object):
 
 	def extract_grammar(self, rule):
 		rule = self.__getattribute__(rule).__doc__
-		rule_clean = re.sub('  *', ' ', rule
+		rule_clean = re.sub('\%prec [A-Z]+', '',
+			re.sub('  *', ' ', rule
 			.replace('\n', ' ')
 			.replace('\t', ' ')
-			.replace(':', '|'))
+			.replace(':', '|')))
 		l = re.findall('[^\| ][^\|]*[^\| ]', rule_clean)
 		start = l[0]
 		rules = list(map(lambda x: x.split(' '),l[1:]))
