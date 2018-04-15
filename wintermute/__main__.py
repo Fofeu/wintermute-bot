@@ -12,4 +12,4 @@ if __name__ =='__main__':
 		multiprocessing = 4
 	)
 
-	client.launch(key)
+	client.run(key)

@@ -11,7 +11,6 @@ class Wintermute(discord.Client):
 	__channels = None
 	__bot_prelude = None
 	__timeout = None
-	__loop = None
 	__parser = None
 	__pool = None
 
@@ -20,18 +19,13 @@ class Wintermute(discord.Client):
 		bot_prelude = '[bot] ',
 		timeout = 10,
 		multiprocessing = 1,
-		loglevel = logging.INFO,
-		async_loop = None):
+		loglevel = logging.INFO):
 		super().__init__()
 
 		self.__channels = channels
 		self.__bot_prelude = bot_prelude
 		self.__timeout = timeout
 		logging.basicConfig(level=loglevel)
-		if async_loop is not None:
-			self.__loop = async_loop
-		else:
-			self.__loop = asyncio.get_event_loop()
 
 		self.__parser = BotGram()
 		self.__pool = ProcessPool(max_workers=multiprocessing, initializer=seed)
@@ -39,18 +33,6 @@ class Wintermute(discord.Client):
 	def __del__(self):
 		self.__pool.close()
 		self.__pool.join()
-		if self.__loop.is_running():
-			self.__loop.stop()
-		self.__loop.run_until_complete(self.__loop.shutdown_asyncgens())
-		self.__loop.close()
-
-	def launch(self, key):
-		try:
-			self.__loop.run_until_complete(self.start(key))
-		except:
-			self.__loop.run_until_complete(self.logout())
-		finally:
-			self.__loop.close()
 
 	async def on_ready(self):
 		logging.info("Online as " + str(self.user.name))
