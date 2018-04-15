@@ -4,6 +4,7 @@ from rollexpr import *
 from parseresult import *
 from parseexceptions import *
 from mkmutils import *
+import re
 
 class BotGram(object):
 
@@ -13,11 +14,15 @@ class BotGram(object):
 		'detail': 'DETAIL',
 		'd': 'DICED',
 		'D': 'DICED',
-		'mtg': 'MTG'
+		'mtg': 'MTG',
+		'store': 'STORE',
+		'help': 'HELP'
 	}
 
 	tokens = (
 		'MENTION',
+
+		'ID',
 
 		'CDLAMERDE',
 
@@ -35,7 +40,12 @@ class BotGram(object):
 		'LPAR',
 		'RPAR',
 
-		'MTG'
+		'MTG',
+
+		'STORE',
+		'LITERAL',
+
+		'HELP'
 	)
 
 	t_MENTION = r'<@[!0-9]*>'
@@ -69,11 +79,13 @@ class BotGram(object):
 
 	def t_ID(self, t):
 		r'[a-zA-Z]+'
-		if t.value in self.reserved_words:
-			t.type = self.reserved_words[t.value]
-			return t
-		else:
-			raise LexerError(t)
+		t.type = self.reserved_words.get(t.value, 'ID')
+		return t
+
+	def t_LITERAL(self, t):
+		r'"[^"]*"'
+		t.value = t.value[1:-1]
+		return t
 
 	def t_error(self, t):
 		raise LexerError(t)
@@ -83,7 +95,9 @@ class BotGram(object):
 	def p_start(self, p):
 		'''start : MENTION rollcmd
 		         | MENTION cdlamerdecmd
-		         | MENTION mtgcmd'''
+		         | MENTION mtgcmd
+		         | MENTION storecmd
+		         | MENTION helpcmd'''
 		p[0] = TextAnswer(p[1], p[2])
 
 	def p_cdlamerdecmd(self, p):
@@ -93,6 +107,26 @@ class BotGram(object):
 	def p_mtgcmd(self, p):
 		'''mtgcmd : MTG'''
 		p[0] = "MTG commands are not implemented yet"
+
+	def p_storecmd(self, p):
+		'storecmd : STORE string'
+		p[0] = "Store commands are not implemented yet. However, I would have stored " + p[3]
+
+	def p_helpcmd(self, p):
+		'helpcmd : HELP string'
+		p[0] = self.help_text(p[2])
+
+	# Strings
+
+	def p_string_short(self, p):
+		'string : ID'
+		p[0] = p[1]
+
+	def p_string_long(self, p):
+		'string : LITERAL'
+		p[0] = p[1]
+
+	# Roll Language
 
 	def p_rollcmd(self, p):
 		'rollcmd : ROLL opt_detail rollexpr'
@@ -182,6 +216,45 @@ class BotGram(object):
 	def __init__(self):
 		self.lexer = lex.lex(module=self)
 		self.parser = yacc.yacc(module=self, write_tables=False)
+		self.introspect()
+
+	def introspect(self):
+		self.parser_rules = list(filter(
+			lambda x: re.match('^p_.*', x),
+			self.__dir__()))
+		self.parser_dir = {}
+		for rule in self.parser_rules:
+			if self.__getattribute__(rule).__doc__ is not None:
+				start, rules = self.extract_grammar(rule)
+				if start not in self.parser_dir:
+					self.parser_dir[start] = rules
+				else:
+					self.parser_dir[start] += rules
+
+	def extract_grammar(self, rule):
+		rule = self.__getattribute__(rule).__doc__
+		rule_clean = re.sub('  *', ' ', rule
+			.replace('\n', ' ')
+			.replace('\t', ' ')
+			.replace(':', '|'))
+		l = re.findall('[^\| ][^\|]*[^\| ]', rule_clean)
+		start = l[0]
+		rules = list(map(lambda x: x.split(' '),l[1:]))
+		return start, rules
+
+	def help_text(self, section):
+		if section is None:
+			return self.help_text(self.start)
+		elif section in self.tokens:
+			return section + ' is a token'
+		elif section not in self.parser_dir:
+			return section + ' is not a known grammar rule'
+		else:
+			result = section + ':'
+			for rule in self.parser_dir[section]:
+				result += '\n\t'
+				result += ' '.join(rule)
+			return result
 
 	def parse_text(self, s):
 		return self.parser.parse(s, lexer=self.lexer)
