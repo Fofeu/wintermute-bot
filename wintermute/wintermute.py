@@ -5,6 +5,7 @@ from pebble import ProcessPool
 import asyncio
 from concurrent.futures import TimeoutError
 from discord.errors import HTTPException
+from numpy.random import seed
 
 class Wintermute(discord.Client):
 	__channels = None
@@ -33,7 +34,7 @@ class Wintermute(discord.Client):
 			self.__loop = asyncio.get_event_loop()
 
 		self.__parser = BotGram()
-		self.__pool = ProcessPool(max_workers=multiprocessing)
+		self.__pool = ProcessPool(max_workers=multiprocessing, initializer=seed)
 
 	def __del__(self):
 		self.__pool.close()
