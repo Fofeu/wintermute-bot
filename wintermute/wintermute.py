@@ -59,7 +59,9 @@ class Wintermute(discord.Client):
 					str,
 					args=(resp,),
 					timeout=self.__timeout)
-				asyncio.ensure_future(self.collect_response(mess.channel, mess.author.mention, task))
+				asyncio.ensure_future(
+					self.collect_response(mess.channel, mess.author.mention, task),
+					loop=self.loop)
 
 	async def collect_response(self, channel, mention, task):
 		try:
