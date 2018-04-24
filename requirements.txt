@@ -1,0 +1,5 @@
+mkmsdk
+discord.py
+ply
+numpy
+pebble
