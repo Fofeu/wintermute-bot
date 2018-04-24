@@ -48,6 +48,9 @@ class Wintermute(discord.Client):
 		if mess.channel.is_private:
 			return
 
+		if mess.author == self.user:
+			return
+
 		if (mess.channel.permissions_for(mess.channel.server.me).send_messages
 			and mess.channel.name == self.__channels[mess.server.name]):
 			resp = self.__parser.parse(mess)
