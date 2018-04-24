@@ -27,7 +27,7 @@ class Wintermute(discord.Client):
 		self.__timeout = timeout
 		logging.basicConfig(level=loglevel)
 
-		self.__parser = BotGram()
+		self.__parser = BotGram(prelude=bot_prelude)
 		self.__pool = ProcessPool(max_workers=multiprocessing, initializer=seed)
 
 	def __del__(self):
@@ -43,7 +43,7 @@ class Wintermute(discord.Client):
 				for c in s.channels:
 					if c.name == channel:
 						logging.info("found #" + channel + " on " + s.name)
-						tmpchannels["s.name"] = c.name
+						tmpchannels[s.name] = c.name
 		logging.info('Setup done')
 
 	async def on_message(self, mess):
@@ -71,8 +71,7 @@ class Wintermute(discord.Client):
 			while not task.done():
 				await asyncio.sleep(0.1)
 			result = task.result()
-			await self.send_message(channel,
-				self.__bot_prelude + mention + ' ' + result)
+			await self.send_message(channel, result)
 		except TimeoutError:
 			await self.send_message(channel,
 				self.__bot_prelude + mention + ' Your request timed out')

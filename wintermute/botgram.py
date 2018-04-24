@@ -1,5 +1,6 @@
 import ply.lex as lex
 import ply.yacc as yacc
+import logging
 from rollexpr import *
 from parseresult import *
 from parseexceptions import *
@@ -105,23 +106,24 @@ class BotGram(object):
 		         | MENTION mtgcmd
 		         | MENTION storecmd
 		         | MENTION helpcmd'''
-		p[0] = TextAnswer(p[1], p[2])
+		p[0] = p[2]
+		p[0].mention = p[1]
 
 	def p_cdlamerdecmd(self, p):
 		'cdlamerdecmd : CDLAMERDE'
-		p[0] = "Oui, maîîître !"
+		p[0] = TextAnswer("Oui, maîîître !")
 
 	def p_mtgcmd(self, p):
 		'''mtgcmd : MTG'''
-		p[0] = "MTG commands are not implemented yet"
+		p[0] = TextAnswer("MTG commands are not implemented yet")
 
 	def p_storecmd(self, p):
 		'storecmd : STORE string'
-		p[0] = "Store commands are not implemented yet."
+		p[0] = TextAnswer("Store commands are not implemented yet.")
 
 	def p_helpcmd(self, p):
 		'helpcmd : HELP opt_string'
-		p[0] = self.help_text(p[2])
+		p[0] = TextAnswer(self.help_text(p[2]))
 
 	# Strings
 
@@ -199,7 +201,11 @@ class BotGram(object):
 	def p_error(self, p):
 		raise ParserError(p)
 
-	def __init__(self):
+	# Non-language details
+	prelude = None
+
+	def __init__(self, prelude=None):
+		self.prelude = prelude
 		self.lexer = lex.lex(module=self)
 		self.parser = yacc.yacc(module=self, write_tables=False)
 		self.introspect()
@@ -210,7 +216,7 @@ class BotGram(object):
 			self.__dir__()))
 		self.parser_dir = {}
 		for rule in self.parser_rules:
-			if self.__getattribute__(rule).__doc__ is not None:
+			if getattr(self,rule).__doc__ is not None:
 				start, rules = self.extract_grammar(rule)
 				if start not in self.parser_dir:
 					self.parser_dir[start] = rules
@@ -233,33 +239,56 @@ class BotGram(object):
 		if section is None:
 			return self.help_text(self.start)
 		elif section in self.tokens:
-			return section + ' is a token'
+			try:
+				tok = getattr(self, 't_'+section)
+			except AttributeError:
+				tok = list(
+					map(lambda kv: kv[0],
+					filter(lambda kv: kv[1]==section,
+					self.reserved_words.items())))
+				tok = None if len(tok)==0 else tok
+			desc = ' is a token'
+			if type(tok) is str:
+				desc += ' produced by rule `' + tok + '`'
+			elif type(tok) is list:
+				desc += ' produced by rules'
+				for r in tok:
+					desc += ' `' + r + '`'
+			elif tok.__doc__ is not None:
+				desc += ' produced by rule `' + tok.__doc__ + '`'
+			return section + desc
 		elif section not in self.parser_dir:
 			return section + ' is not a known grammar rule'
 		else:
 			result = section + ':'
+			try:
+				result += getattr(self, 'help_' + section)
+			except AttributeError:
+				pass
 			for rule in self.parser_dir[section]:
 				result += '\n\t'
 				result += ' '.join(rule)
-			return result
+			return '```'+result+'```'
 
 	def parse_text(self, s):
 		return self.parser.parse(s, lexer=self.lexer)
 
 	def parse(self, mess):
 		try:
-			parsed = self.parser.parse(mess.content, lexer=self.lexer)
+			parsed = self.parse_text(mess.content)
+			parsed.author = mess.author.mention
+			parsed.prelude = self.prelude
 			self.check(parsed, mess)
 			return parsed
 		except (LexerError,ParserError) as e:
-			print(e)
+			logging.info(e)
 			pass
 		except WronglyAddressedMessage:
 			pass
 
 	def check(self, parsed, mess):
 		# Checks that the message is actually for us
-		if parsed._mention != mess.channel.server.me.mention:
+		if parsed.mention != mess.channel.server.me.mention:
 			raise WronglyAddressedMessage
 
 if __name__ == "__main__":
