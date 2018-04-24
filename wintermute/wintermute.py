@@ -36,6 +36,9 @@ class Wintermute(discord.Client):
 
 	async def on_ready(self):
 		logging.info("Online as " + str(self.user.name))
+		game = discord.Game()
+		game.name = "Manipulating humanity"
+		await self.change_presence(game=game)
 		logging.info('Setup done')
 
 	async def on_message(self, mess):
