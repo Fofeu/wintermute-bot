@@ -36,14 +36,6 @@ class Wintermute(discord.Client):
 
 	async def on_ready(self):
 		logging.info("Online as " + str(self.user.name))
-		tmpchannels = {}
-		for s in self.servers:
-			if s.name in self.__channels:
-				channel = self.__channels[s.name]
-				for c in s.channels:
-					if c.name == channel:
-						logging.info("found #" + channel + " on " + s.name)
-						tmpchannels[s.name] = c.name
 		logging.info('Setup done')
 
 	async def on_message(self, mess):
